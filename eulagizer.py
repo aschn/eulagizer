@@ -157,5 +157,6 @@ class Eulagizer(object):
             if (w2, w3) in self.cache:
                 return w2, w3
 
-        # if got here, newline
-        return w2, '{{{NEWLINE}}}'
+        # if got here, error
+        msg = 'Oh noes, got stuck in a corner of the Markov chain from which there is no escape. Try again!'
+        raise RuntimeError(msg)
