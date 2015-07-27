@@ -2,17 +2,8 @@ import random
 import os
 import string
 
-"""
-Usage:
 
-from generator import Markov
-gen = Markov()
-gen.run('path/to/corpus/dir', 'path/to/output.txt',
-        'Extra Fake Co', 500)
-"""
-
-
-class Markov(object):
+class Eulagizer(object):
     # See http://agiliq.com/blog/2009/06/generating-pseudo-random-text-with-markov-chains-u/
     def __init__(self):
         # cache of all triples
