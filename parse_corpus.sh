@@ -10,4 +10,5 @@ mkdir corpus
 ./parse_corpus_file.py corpus_raw/minecraft.txt corpus/minecraft.txt 'Our Game' minecraft.com Minecraft
 ./parse_corpus_file.py corpus_raw/netflix.txt corpus/netflix.txt Netflix netflix.com 'Netflix, Inc.'
 ./parse_corpus_file.py corpus_raw/sublime.txt corpus/sublime.txt 'Sublime Text' sublime.com 'SUBLIME HQ'
+./parse_corpus_file.py corpus_raw/ustream.txt corpus/ustream.txt Ustream ustream.tv 'Ustream, Inc.'
 ./parse_corpus_file.py corpus_raw/world_of_warcraft.txt corpus/world_of_warcraft.txt 'World of Warcraft' blizzard.com 'Blizzard Entertainment'
