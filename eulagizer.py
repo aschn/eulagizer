@@ -5,32 +5,27 @@ import string
 
 class Eulagizer(object):
     # See http://agiliq.com/blog/2009/06/generating-pseudo-random-text-with-markov-chains-u/
-    def __init__(self):
+    def __init__(self, indir=None):
         # cache of all triples
         self.cache = {}
 
-    def run(self, indir=None, outfile='EULA.txt',
-            company='My Company', website='www.mysite.com', parent='Parent Co',
-            length=500):
-        """
-        Generates a random EULA
-        for a company named 'company'
-        that is 'length' words long,
-        based on the corpus files in directory 'indir',
-        and writes the EULA to 'outfile'.
-        """
-        # load corpus if needed
+        # list of seeds
+        self.seeds = []
+
+        # load corpus if requested
         if indir:
             for filename in os.listdir(indir):
                 self.add_to_corpus(os.path.join(indir, filename))
 
-        # generate and detokenize text
-        tokenized_output = self.generate_markov_text(length=length)
-        detokenized_output = self.detokenize(tokenized_output, company, parent, website)
-
-        # write output
-        with open(outfile, 'w') as f:
-            f.write(detokenized_output)
+    def run(self, product, website, company, length=500):
+        """
+        Generates a string containing a random EULA
+        for a 'product' made by a 'company'
+        that is 'length' words long.
+        """
+        tokenized_output = self.generate_markov_text(length)
+        detokenized_output = self.detokenize(tokenized_output, product, company, website)
+        return detokenized_output
 
     def add_to_corpus(self, filename):
         # read file
@@ -44,6 +39,9 @@ class Eulagizer(object):
         # create triples and cache
         triples = self.words_to_triples(words)
         self.add_to_cache(triples)
+
+        # add first two words as seed
+        self.seeds.append(words[:2])
 
     def words_to_triples(self, words):
         """ Generates triples from the given data string. So if our string were
@@ -67,8 +65,8 @@ class Eulagizer(object):
                 self.cache[key] = [w3]
 
     def generate_markov_text(self, length):
-        # seed from cache keys
-        seed_word, next_word = 'Terms', 'of'
+        # seed
+        seed_word, next_word = random.choice(self.seeds)
 
         # set up to generate
         w1, w2 = seed_word, next_word
@@ -85,23 +83,34 @@ class Eulagizer(object):
 
             # if not finished, run Markov chain
             else:
-                w1, w2 = w2, random.choice(self.cache[(w1, w2)])
+                w1, w2 = self.markov_step(w1, w2)
 
         # return
         return ' '.join(gen_words)
 
-    def detokenize(self, text, company, parent, website):
+    def markov_step(self, w1, w2):
+        # only take moves that have a next move after
+        success = False
+        while not success:
+            w3 = random.choice(self.cache[(w1, w2)])
+            if (w2, w3) in self.cache:
+                success = True
+        return w2, w3
+
+    def detokenize(self, text, product, company, website):
         """
-        Detokenizes text and inserts company name.
+        Detokenizes text and inserts product and company names.
         Based on tokenization in `parse_corpus.py`
         """
-        # replace company name and variants, and newlines
+        # replace product and company names and variants, and newlines
         to_replace = [
+            ('{{{PRODUCT}}}', product),
+            ('{{{PRODUCT_LOWER}}}', product.lower()),
+            ('{{{PRODUCT_UPPER}}}', product.upper()),
             ('{{{COMPANY}}}', company),
-            ('{{{WEBSITE}}}', website),
-            ('{{{PARENT_CO}}}', parent),
             ('{{{COMPANY_LOWER}}}', company.lower()),
             ('{{{COMPANY_UPPER}}}', company.upper()),
+            ('{{{WEBSITE}}}', website),
             (' {{{NEWLINE}}} ', '\n\n'),
             ('{{{NEWLINE}}}', '\n'),
         ]

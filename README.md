@@ -18,10 +18,12 @@ In python:
 ```
 from eulagizer import Eulagizer
 
-gizer = Eulagizer()
+gizer = Eulagizer(indir='corpus')
 
-gizer.run(indir='corpus', outfile='EULA.txt', length=500,
-          company='My Company', parent='Central Headquarters', website='company.com')
+eula_text = gizer.run(length=500,
+					  product='Eulagizer',
+		  			  company='Central Headquarters',
+		  			  website='company.com')
 ```
 
 This will generate an EULA at least 500 words long with the given parameters.
