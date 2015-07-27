@@ -2,6 +2,76 @@ import random
 import os
 import string
 
+#################
+# helper utils
+#################
+
+
+def words_to_triples(words):
+    """
+    Generates triples from the given data string. So if our string were
+    "What a lovely day", we'd generate (What, a, lovely) and then
+    (a, lovely, day).
+    """
+    if len(words) < 3:
+        return
+
+    for i in range(len(words) - 2):
+        yield (words[i], words[i+1], words[i+2])
+
+
+def detokenize(text, product, company, website):
+    """
+    Detokenizes text and inserts product and company names.
+    Based on tokenization in `parse_corpus.py`
+    """
+    # replace product and company names and variants, and newlines
+    to_replace = [
+        ('{{{WEBSITE}}}', website),
+        ('{{{PRODUCT}}}', product),
+        ('{{{PRODUCT_LOWER}}}', product.lower()),
+        ('{{{PRODUCT_UPPER}}}', product.upper()),
+        ('{{{COMPANY}}}', company),
+        ('{{{COMPANY_LOWER}}}', company.lower()),
+        ('{{{COMPANY_UPPER}}}', company.upper()),
+        (' {{{NEWLINE}}} ', '\n\n'),
+        ('{{{NEWLINE}}}', '\n'),
+    ]
+    for old, new in to_replace:
+        text = string.replace(text, old, new)
+
+    # return
+    return text
+
+
+def tokenize(text, product, company, website):
+    """
+    Detokenizes text and inserts product and company names.
+    Based on tokenization in `parse_corpus.py`
+    """
+    # replace product and company names and variants, and newlines
+    to_replace = [
+        (website, '{{{WEBSITE}}}'),
+        (product, '{{{PRODUCT}}}'),
+        (product.lower(), '{{{PRODUCT_LOWER}}}'),
+        (product.upper(), '{{{PRODUCT_UPPER}}}'),
+        (company, '{{{COMPANY}}}'),
+        (company.lower(), '{{{COMPANY_LOWER}}}'),
+        (company.upper(), '{{{COMPANY_UPPER}}}'),
+        ('\n\n', ' {{{NEWLINE}}} '),
+        ('\n', ' {{{NEWLINE}}} '),
+    ]
+    for old, new in to_replace:
+        text = string.replace(text, old, new)
+
+    # return
+    return text
+
+
+#################
+# main interface
+#################
+
 
 class Eulagizer(object):
     # See http://agiliq.com/blog/2009/06/generating-pseudo-random-text-with-markov-chains-u/
@@ -21,10 +91,11 @@ class Eulagizer(object):
         """
         Generates a string containing a random EULA
         for a 'product' made by a 'company'
-        that is 'length' words long.
+        that is 'length' words long,
+        assuming the corpus is tokenized.
         """
-        tokenized_output = self.generate_markov_text(length)
-        detokenized_output = self.detokenize(tokenized_output, product, company, website)
+        tokenized_output = self.generate_text(length)
+        detokenized_output = detokenize(tokenized_output, product, company, website)
         return detokenized_output
 
     def add_to_corpus(self, filename):
@@ -37,22 +108,11 @@ class Eulagizer(object):
         words = data.split()
 
         # create triples and cache
-        triples = self.words_to_triples(words)
+        triples = words_to_triples(words)
         self.add_to_cache(triples)
 
         # add first two words as seed
         self.seeds.append(words[:2])
-
-    def words_to_triples(self, words):
-        """ Generates triples from the given data string. So if our string were
-                "What a lovely day", we'd generate (What, a, lovely) and then
-                (a, lovely, day).
-        """
-        if len(words) < 3:
-            return
-
-        for i in range(len(words) - 2):
-            yield (words[i], words[i+1], words[i+2])
 
     def add_to_cache(self, triples):
         for w1, w2, w3 in triples:
@@ -64,7 +124,7 @@ class Eulagizer(object):
             else:
                 self.cache[key] = [w3]
 
-    def generate_markov_text(self, length):
+    def generate_text(self, length):
         # seed
         seed_word, next_word = random.choice(self.seeds)
 
@@ -90,32 +150,12 @@ class Eulagizer(object):
 
     def markov_step(self, w1, w2):
         # only take moves that have a next move after
-        success = False
-        while not success:
-            w3 = random.choice(self.cache[(w1, w2)])
+        choices = self.cache[(w1, w2)]
+
+        for i in range(len(choices)):
+            w3 = random.choice(choices)
             if (w2, w3) in self.cache:
-                success = True
-        return w2, w3
+                return w2, w3
 
-    def detokenize(self, text, product, company, website):
-        """
-        Detokenizes text and inserts product and company names.
-        Based on tokenization in `parse_corpus.py`
-        """
-        # replace product and company names and variants, and newlines
-        to_replace = [
-            ('{{{PRODUCT}}}', product),
-            ('{{{PRODUCT_LOWER}}}', product.lower()),
-            ('{{{PRODUCT_UPPER}}}', product.upper()),
-            ('{{{COMPANY}}}', company),
-            ('{{{COMPANY_LOWER}}}', company.lower()),
-            ('{{{COMPANY_UPPER}}}', company.upper()),
-            ('{{{WEBSITE}}}', website),
-            (' {{{NEWLINE}}} ', '\n\n'),
-            ('{{{NEWLINE}}}', '\n'),
-        ]
-        for old, new in to_replace:
-            text = string.replace(text, old, new)
-
-        # return
-        return text
+        # if got here, newline
+        return w2, '{{{NEWLINE}}}'
