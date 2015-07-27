@@ -126,10 +126,9 @@ class Eulagizer(object):
 
     def generate_text(self, length):
         # seed
-        seed_word, next_word = random.choice(self.seeds)
+        w1, w2 = random.choice(self.seeds)
 
         # set up to generate
-        w1, w2 = seed_word, next_word
         gen_words = []
         finished = False
 
@@ -149,9 +148,10 @@ class Eulagizer(object):
         return ' '.join(gen_words)
 
     def markov_step(self, w1, w2):
-        # only take moves that have a next move after
+        # all the words that could come next
         choices = self.cache[(w1, w2)]
 
+        # only take moves that have a next move after
         for i in range(len(choices)):
             w3 = random.choice(choices)
             if (w2, w3) in self.cache:
