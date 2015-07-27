@@ -45,9 +45,10 @@ gizer = Eulagizer('corpus')
 gizer.add_to_corpus('path/to/other.txt')
 
 # generate EULA text string
-# (at least 500 words long, with the other given parameters)
+# length is the minimum number of words, other parameters are self-explanatory
 # feel free to run this repeatedly until you get one you like :)
-eula_text = gizer.run(length=500, product='Eulagizer', company='Central Headquarters', website='company.com')
+eula_text = gizer.run(length=500, product='Eulagizer',
+                      company='Central Headquarters', website='company.com')
 
 # optional: write to file
 with open('path/to/output.txt', 'w') as f:
