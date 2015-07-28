@@ -6,6 +6,7 @@ mkdir corpus
 ./parse_corpus_file.py corpus_raw/dropbox.txt corpus/dropbox.txt Dropbox dropbox.com 'Dropbox, Inc'
 ./parse_corpus_file.py corpus_raw/facebook.txt corpus/facebook.txt Facebook facebook.com Facebook
 ./parse_corpus_file.py corpus_raw/hoefler.txt corpus/hoefler.txt Hoefler typography.com 'H&Co'
+./parse_corpus_file.py corpus_raw/gpl.txt corpus/gpl.txt 'General Public License' gnu.org 'Free Software Foundation'
 ./parse_corpus_file.py corpus_raw/league_of_legends.txt corpus/league_of_legends.txt 'League of Legends' leagueoflegends.com 'Riot Games'
 ./parse_corpus_file.py corpus_raw/minecraft.txt corpus/minecraft.txt 'Our Game' minecraft.com Minecraft
 ./parse_corpus_file.py corpus_raw/netflix.txt corpus/netflix.txt Netflix netflix.com 'Netflix, Inc.'
